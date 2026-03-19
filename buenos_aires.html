@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Buenos Aires con Amor — Mayo 2026</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -227,7 +228,85 @@ h2 {
   color: #7a6020; padding: 0.2rem 0.6rem;
   border-radius: 10px; font-size: 0.7rem; margin-top: 0.5rem;
 }
+.day-transport {
+  display: flex; align-items: center; gap: 0.5rem;
+  background: linear-gradient(135deg, #eef4ff, #e8f0fe);
+  border: 1px solid #c5d5f0;
+  border-radius: 10px; padding: 0.5rem 0.9rem;
+  margin-bottom: 0.8rem; font-size: 0.78rem; color: #2a4a7a;
+  line-height: 1.5;
+}
+.day-transport .transport-icon { font-size: 1.1rem; flex-shrink: 0; }
+.day-transport strong { color: #1a3560; }
+.day-block a, .day-body a {
+  color: var(--red); text-decoration: underline;
+  text-decoration-color: rgba(166,38,57,0.3);
+  text-underline-offset: 2px; transition: text-decoration-color 0.2s;
+}
+.day-block a:hover, .day-body a:hover { text-decoration-color: var(--red); }
+.day-workshop {
+  display: inline-flex; align-items: center; gap: 0.3rem;
+  background: #f0e8ff; border: 1px solid #d0bff0;
+  color: #5a3a8a; padding: 0.2rem 0.6rem;
+  border-radius: 10px; font-size: 0.7rem; margin-top: 0.5rem;
+}
 
+/* ── MAPA INTERACTIVO ── */
+.mapa-section { background: var(--dark); }
+.mapa-section h2 { color: var(--white); }
+.mapa-section .lead { color: rgba(247,240,230,0.6); }
+#leaflet-map {
+  width: 100%; height: 560px;
+  border-radius: var(--radius);
+  overflow: hidden;
+  box-shadow: 0 8px 40px rgba(0,0,0,0.4);
+  border: 2px solid rgba(201,152,58,0.3);
+}
+.mapa-filters {
+  display: flex; flex-wrap: wrap; gap: 0.5rem;
+  margin-bottom: 1.2rem;
+}
+.mapa-filter {
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.15);
+  color: rgba(247,240,230,0.7);
+  padding: 0.4rem 1rem; border-radius: 20px;
+  font-size: var(--fs-xs); font-weight: 500;
+  cursor: pointer; transition: all 0.2s;
+  font-family: 'Inter', sans-serif;
+}
+.mapa-filter:hover { background: rgba(255,255,255,0.15); color: var(--cream); }
+.mapa-filter.active {
+  background: var(--red); border-color: var(--red);
+  color: white; font-weight: 600;
+}
+.mapa-legend {
+  display: flex; flex-wrap: wrap; gap: 1.5rem;
+  margin-top: 1rem; padding-top: 0.8rem;
+}
+.legend-item {
+  display: flex; align-items: center; gap: 0.4rem;
+  color: rgba(247,240,230,0.5); font-size: var(--fs-xs);
+}
+.legend-dot {
+  width: 10px; height: 10px; border-radius: 50%;
+  display: inline-block; flex-shrink: 0;
+}
+.leaflet-popup-content-wrapper {
+  border-radius: 10px !important;
+  font-family: 'Inter', sans-serif !important;
+}
+.leaflet-popup-content { font-size: 0.85rem !important; line-height: 1.5 !important; }
+.popup-day {
+  display: inline-block; background: var(--red); color: white;
+  padding: 0.15rem 0.5rem; border-radius: 8px; font-size: 0.7rem;
+  font-weight: 600; margin-bottom: 0.3rem;
+}
+.popup-title { font-weight: 600; font-size: 0.95rem; margin-bottom: 0.2rem; }
+.popup-desc { color: #666; font-size: 0.8rem; }
+.popup-type-restaurant .popup-day { background: #C9983A; }
+.popup-type-workshop .popup-day { background: #5a3a8a; }
+.popup-type-home .popup-day { background: #2a6a3a; }
 /* ── HIGHLIGHT CARDS (Tango, Jardin, Recoleta) ── */
 .highlights { background: var(--dark); }
 .highlights h2 { color: white; }
@@ -373,6 +452,153 @@ footer .footer-title {
   font-size: 1.8rem; color: var(--gold); margin-bottom: 0.5rem;
 }
 footer p { margin-bottom: 0.4rem; }
+
+/* ══════════════════════════════════════════════
+   MOBILE RESPONSIVE
+   ══════════════════════════════════════════════ */
+
+/* ── HAMBURGER BUTTON ── */
+.nav-hamburger {
+  display: none;
+  flex-direction: column; gap: 5px;
+  background: none; border: none; cursor: pointer;
+  padding: 0.5rem; z-index: 200;
+}
+.nav-hamburger span {
+  display: block; width: 24px; height: 2px;
+  background: var(--cream); border-radius: 2px;
+  transition: all 0.3s;
+}
+.nav-hamburger.open span:nth-child(1) { transform: rotate(45deg) translate(5px, 5px); }
+.nav-hamburger.open span:nth-child(2) { opacity: 0; }
+.nav-hamburger.open span:nth-child(3) { transform: rotate(-45deg) translate(5px, -5px); }
+
+/* ── TABLET ≤ 900px ── */
+@media (max-width: 900px) {
+  nav { padding: 0.8rem 1.5rem; }
+
+  .hero h1 { font-size: clamp(2.2rem, 6vw, 3.5rem); }
+  .hero-sub { font-size: var(--fs-md); }
+
+  section { padding: clamp(3rem, 6vw, 5rem) clamp(1.2rem, 4vw, 3rem); }
+
+  .day-blocks { gap: 1rem; }
+
+  .hl-card { min-height: 360px; }
+}
+
+/* ── MOBILE ≤ 700px ── */
+@media (max-width: 700px) {
+  /* NAV → HAMBURGER */
+  .nav-hamburger { display: flex; }
+  .nav-links {
+    position: fixed; top: 0; right: -100%; width: 75vw; max-width: 300px;
+    height: 100vh; flex-direction: column;
+    background: rgba(28,15,10,0.97);
+    backdrop-filter: blur(16px);
+    padding: 5rem 2rem 2rem;
+    gap: 1.5rem; transition: right 0.35s ease;
+    box-shadow: -4px 0 30px rgba(0,0,0,0.5);
+    z-index: 150;
+  }
+  .nav-links.open { right: 0; }
+  .nav-links a { font-size: var(--fs-md); color: var(--cream); }
+  .nav-cta { display: none; }
+  nav { padding: 0.7rem 1.2rem; }
+
+  /* OVERLAY */
+  .nav-overlay {
+    display: none; position: fixed; inset: 0;
+    background: rgba(0,0,0,0.5); z-index: 140;
+  }
+  .nav-overlay.show { display: block; }
+
+  /* HERO */
+  .hero { min-height: 85vh; }
+  .hero-content { padding: 0 1.2rem; }
+  .hero h1 { font-size: clamp(1.8rem, 8vw, 2.8rem); }
+  .hero-sub { font-size: var(--fs-sm); margin-bottom: 1.5rem; }
+  .hero-pills { gap: 0.4rem; }
+  .pill { padding: 0.3rem 0.7rem; font-size: 0.7rem; }
+  .btn-primary { padding: 0.7rem 1.5rem; font-size: var(--fs-sm); }
+  .hero-scroll { display: none; }
+
+  /* INTRO */
+  .intro-grid { gap: 1rem; }
+  .intro-img-wrap { min-height: 250px; }
+  .stat-card .num { font-size: 2rem; }
+
+  /* DAY CARDS */
+  .day-card { grid-template-columns: 60px 1fr; }
+  .day-num { padding: 1rem 0.3rem; }
+  .day-num .d { font-size: 1.5rem; }
+  .day-body { padding: 1rem 1.2rem; }
+  .day-body h3 { font-size: 1rem; }
+  .day-blocks { flex-direction: column; gap: 0.8rem; }
+  .day-block { min-width: 0; }
+  .day-transport { font-size: 0.72rem; padding: 0.4rem 0.7rem; flex-wrap: wrap; }
+
+  /* MAP */
+  #leaflet-map { height: 380px; }
+  .mapa-filters { gap: 0.35rem; }
+  .mapa-filter { padding: 0.35rem 0.75rem; font-size: 0.7rem; }
+  .mapa-legend { gap: 0.8rem; flex-wrap: wrap; }
+
+  /* HIGHLIGHTS */
+  .hl-card { min-height: 300px; }
+  .hl-content h3 { font-size: 1.2rem; }
+
+  /* GASTRO */
+  .gastro-food-grid { grid-template-columns: 1fr; }
+  .food-item { padding: 0.9rem; }
+
+  /* PARKS */
+  .parks { min-height: auto; }
+  .parks-img { min-height: 280px; }
+  .parks-text { padding: 2rem 1.5rem; }
+
+  /* FULL-WIDTH IMAGE+TEXT SECTIONS */
+  section[style*="grid-template-columns"] {
+    grid-template-columns: 1fr !important;
+    min-height: auto !important;
+  }
+  section[style*="grid-template-columns"] > div[style*="min-height"] {
+    min-height: 260px !important;
+  }
+  section[style*="grid-template-columns"] img {
+    width: 100%; height: 260px; object-fit: cover; display: block;
+  }
+
+  /* SYMBOLS */
+  .symbol-item { padding: 0.9rem 1rem; }
+  .symbol-icon { font-size: 1.5rem; }
+
+  /* TIPS */
+  .tip-card { padding: 1.2rem; }
+  .tip-icon { font-size: 1.6rem; }
+
+  /* FOOTER */
+  footer { padding: 2rem 1.2rem; }
+  footer .footer-title { font-size: 1.4rem; }
+
+  /* H2 global smaller */
+  h2 { font-size: clamp(1.5rem, 5vw, 2.2rem); }
+  .lead { font-size: var(--fs-sm); margin-bottom: 1.5rem; }
+}
+
+/* ── SMALL PHONES ≤ 400px ── */
+@media (max-width: 400px) {
+  nav { padding: 0.6rem 0.8rem; }
+  .nav-logo { font-size: 0.95rem; }
+  .hero h1 { font-size: 1.6rem; }
+  .day-card { grid-template-columns: 50px 1fr; }
+  .day-num .d { font-size: 1.2rem; }
+  .day-body { padding: 0.8rem 1rem; }
+  .day-transport { font-size: 0.68rem; }
+  #leaflet-map { height: 320px; }
+  .mapa-filter { padding: 0.3rem 0.6rem; font-size: 0.65rem; }
+  .stat-card .num { font-size: 1.7rem; }
+}
 </style>
 </head>
 <body>
@@ -380,14 +606,19 @@ footer p { margin-bottom: 0.4rem; }
 <!-- NAV -->
 <nav>
   <a href="#" class="nav-logo">Buenos Aires ♥</a>
-  <ul class="nav-links">
+  <ul class="nav-links" id="navLinks">
     <li><a href="#programa">Programa</a></li>
+    <li><a href="#mapa">Mapa</a></li>
     <li><a href="#momentos">Momentos</a></li>
     <li><a href="#gastronomia">Gastronomía</a></li>
     <li><a href="#consejos">Consejos</a></li>
   </ul>
   <a href="#programa" class="nav-cta">Ver plan →</a>
+  <button class="nav-hamburger" id="navHamburger" aria-label="Menú">
+    <span></span><span></span><span></span>
+  </button>
 </nav>
+<div class="nav-overlay" id="navOverlay"></div>
 
 <!-- HERO -->
 <section class="hero">
@@ -454,18 +685,19 @@ footer p { margin-bottom: 0.4rem; }
       <div class="day-num"><div class="d">D1</div><div class="date">Vie<br>8/5</div></div>
       <div class="day-body">
         <h3>Plaza de Mayo & San Telmo</h3>
+        <div class="day-transport"><span class="transport-icon">🚇</span> <strong>Desde Villa Crespo:</strong> Subte B desde Malabia → Leandro N. Alem (terminus), luego 5 min a pie. ~20 min.</div>
         <div class="day-blocks">
           <div class="day-block">
             <div class="day-block-label lbl-am"><span>☀</span> Mañana</div>
-            <p>Plaza de Mayo y la icónica Casa Rosada, el corazón político de Argentina. La pirámide central, el monumento al Gral. Belgrano y la arquitectura porteña.</p>
+            <p><a href="https://turismo.buenosaires.gob.ar/es/otros-establecimientos/plaza-de-mayo" target="_blank">Plaza de Mayo</a> y la icónica <a href="https://www.casarosada.gob.ar/" target="_blank">Casa Rosada</a>, el corazón político de Argentina. La pirámide central, el monumento al Gral. Belgrano y la arquitectura porteña.</p>
           </div>
           <div class="day-block">
             <div class="day-block-label lbl-pm"><span>🌆</span> Tarde</div>
-            <p>Barrio de San Telmo: calles adoquinadas, casas coloniales, mercado de antigüedades. En Plaza Dorrego, tango callejero en vivo — ¡completamente gratis!</p>
+            <p>Barrio de <a href="https://turismo.buenosaires.gob.ar/es/barrio/san-telmo" target="_blank">San Telmo</a>: calles adoquinadas, casas coloniales, <a href="https://www.feriadesantelmo.com/" target="_blank">mercado de antigüedades</a>. En Plaza Dorrego, tango callejero en vivo — ¡completamente gratis!</p>
           </div>
           <div class="day-block">
             <div class="day-block-label lbl-diner"><span>🍽</span> Cena</div>
-            <p><strong>🇮🇹 D'oro Italian Bar</strong> — Pasta artesanal en Monserrat. Perú 159. ¡Reserva recomendada!</p>
+            <p><strong>🇮🇹 <a href="https://www.instagram.com/doroitalianbar/" target="_blank">D'oro Italian Bar</a></strong> — Pasta artesanal en Monserrat. Perú 159. ¡Reserva recomendada!</p>
           </div>
         </div>
       </div>
@@ -476,18 +708,19 @@ footer p { margin-bottom: 0.4rem; }
       <div class="day-num"><div class="d">D2</div><div class="date">Sáb<br>9/5</div></div>
       <div class="day-body">
         <h3>Caminito & Puerto Madero</h3>
+        <div class="day-transport"><span class="transport-icon">🚌</span> <strong>Desde Villa Crespo:</strong> Colectivo 64 o 29 desde Av. Corrientes/Scalabrini Ortiz hacia La Boca. ~40 min. Sin acceso directo en Subte.</div>
         <div class="day-blocks">
           <div class="day-block">
             <div class="day-block-label lbl-am"><span>☀</span> Mañana</div>
-            <p>El barrio más colorido de BA: Caminito en La Boca. Fachadas de chapa pintadas, tango en vivo, artesanías y la energía de La Bombonera cerca.</p>
+            <p>El barrio más colorido de BA: <a href="https://turismo.buenosaires.gob.ar/es/otros-establecimientos/caminito" target="_blank">Caminito en La Boca</a>. Fachadas de chapa pintadas, tango en vivo, artesanías y la energía de <a href="https://www.bocajuniors.com.ar/la-bombonera" target="_blank">La Bombonera</a> cerca.</p>
           </div>
           <div class="day-block">
             <div class="day-block-label lbl-pm"><span>🌆</span> Tarde</div>
-            <p>Puerto Madero, el barrio moderno junto al Río de la Plata. El Puente de la Mujer (Calatrava), paseo al atardecer, aperitivo con vista al río.</p>
+            <p><a href="https://turismo.buenosaires.gob.ar/es/barrio/puerto-madero" target="_blank">Puerto Madero</a>, el barrio moderno junto al Río de la Plata. El <a href="https://turismo.buenosaires.gob.ar/es/otros-establecimientos/puente-de-la-mujer" target="_blank">Puente de la Mujer</a> (Calatrava), paseo al atardecer, aperitivo con vista al río.</p>
           </div>
           <div class="day-block">
             <div class="day-block-label lbl-diner"><span>🍽</span> Cena</div>
-            <p><strong>🇫🇷 Brasserie La Petanque</strong> — Defensa 596, San Telmo. Sopa de cebolla & platos clásicos parisinos.</p>
+            <p><strong>🇫🇷 <a href="https://www.instagram.com/brasseriepetanque/" target="_blank">Brasserie La Petanque</a></strong> — Defensa 596, San Telmo. Sopa de cebolla & platos clásicos parisinos.</p>
           </div>
         </div>
       </div>
@@ -498,18 +731,19 @@ footer p { margin-bottom: 0.4rem; }
       <div class="day-num" style="background:#4a2a6a;"><div class="d">D3</div><div class="date">Dom<br>10/5</div></div>
       <div class="day-body">
         <h3>Recoleta & Bellas Artes</h3>
+        <div class="day-transport"><span class="transport-icon">🚌</span> <strong>Desde Villa Crespo:</strong> Colectivo 39 desde Scalabrini Ortiz/Corrientes hacia Las Heras. ~25 min. Alternativa: Subte B → Carlos Pellegrini + bus.</div>
         <div class="day-blocks">
           <div class="day-block">
             <div class="day-block-label lbl-am"><span>☀</span> Mañana</div>
-            <p>Cementerio de la Recoleta — uno de los más bellos del mundo. Más de 4.800 mausoleos, la tumba de Evita Perón. Contratar guía en la entrada (2h).</p>
+            <p><a href="https://turismo.buenosaires.gob.ar/es/otros-establecimientos/cementerio-de-la-recoleta" target="_blank">Cementerio de la Recoleta</a> — uno de los más bellos del mundo. Más de 4.800 mausoleos, la tumba de Evita Perón. Contratar guía en la entrada (2h).</p>
           </div>
           <div class="day-block">
             <div class="day-block-label lbl-pm"><span>🌆</span> Tarde</div>
-            <p>Museo Nacional de Bellas Artes: Van Gogh, Rembrandt, Rodin, Goya y arte argentino. Entrada gratuita. Abre a las 11h.</p>
+            <p><a href="https://www.bellasartes.gob.ar/" target="_blank">Museo Nacional de Bellas Artes</a>: Van Gogh, Rembrandt, Rodin, Goya y arte argentino. Entrada gratuita. Abre a las 11h.</p>
           </div>
           <div class="day-block">
             <div class="day-block-label lbl-diner"><span>🍽</span> Cena</div>
-            <p><strong>🇫🇷 À Nos Amours</strong> — Gorriti 4488, Palermo. Bistrot íntimo, menú en pizarra, a veces música en vivo.</p>
+            <p><strong>🇫🇷 <a href="https://www.instagram.com/anosamours.ba/" target="_blank">À Nos Amours</a></strong> — Gorriti 4488, Palermo. Bistrot íntimo, menú en pizarra, a veces música en vivo.</p>
           </div>
         </div>
       </div>
@@ -519,20 +753,22 @@ footer p { margin-bottom: 0.4rem; }
     <div class="day-card">
       <div class="day-num" style="background:#2a6a3a;"><div class="d">D4</div><div class="date">Lun<br>11/5</div></div>
       <div class="day-body">
-        <h3>🦆 Jardín Japonés & Botánico</h3>
+        <h3>🦆 Jardín Japonés & Taller de Cerámica</h3>
+        <div class="day-transport"><span class="transport-icon">🚌</span> <strong>Desde Villa Crespo:</strong> Colectivo 34 o 130 desde Scalabrini Ortiz hacia Plaza Italia/Palermo. ~20 min. Alternativa: Subte B → Dorrego + 15 min a pie.</div>
         <div class="day-blocks">
           <div class="day-block">
             <div class="day-block-label lbl-am"><span>☀</span> Mañana</div>
-            <p>Jardín Japonés de Palermo: estanques de koi y <strong>¡patos en libertad!</strong> Puentes, origami gratis, café con vistas zen. Un oasis en plena ciudad.</p>
+            <p><a href="https://www.jardinjapones.org.ar/" target="_blank">Jardín Japonés de Palermo</a>: estanques de koi y <strong>¡patos en libertad!</strong> Puentes, origami gratis, café con vistas zen. Un oasis en plena ciudad.</p>
             <span class="day-special">🦆 Patos libres junto al estanque</span>
           </div>
           <div class="day-block">
             <div class="day-block-label lbl-pm"><span>🌆</span> Tarde</div>
-            <p>Jardín Botánico Carlos Thays: 7 hectáreas gratis, 5.500 especies, estatuas victorianas y invernaderos. Perfecto para una tarde tranquila.</p>
+            <p>🎨 <strong><a href="https://potteryartcafe.com.ar/" target="_blank">Pottery Art Café</a></strong> — Taller de cerámica en pareja en pleno Palermo (Gorriti 4918). Durante 2 horas, pintás piezas de cerámica juntos, con merienda incluida. ¡Te llevás tu creación el mismo día!</p>
+            <span class="day-workshop">🏺 Taller en pareja — Reservar por Instagram @pottery.art.cafe</span>
           </div>
           <div class="day-block">
             <div class="day-block-label lbl-diner"><span>🍽</span> Cena</div>
-            <p><strong>🇵🇹 Amo – Club Portugués</strong> — Av. Pedro Goyena 1468. Música en vivo los viernes, edificio histórico espléndido.</p>
+            <p><strong>🇵🇹 <a href="https://www.instagram.com/amo.clubportugues/" target="_blank">Amo – Club Portugués</a></strong> — Av. Pedro Goyena 1468. Música en vivo los viernes, edificio histórico espléndido.</p>
           </div>
         </div>
       </div>
@@ -542,20 +778,21 @@ footer p { margin-bottom: 0.4rem; }
     <div class="day-card">
       <div class="day-num" style="background:#6a4a1a;"><div class="d">D5</div><div class="date">Mar<br>12/5</div></div>
       <div class="day-body">
-        <h3>🐕 MALBA & Palermo con Golden Retrievers</h3>
+        <h3>🐕 MALBA & Clase de Cocina Argentina</h3>
+        <div class="day-transport"><span class="transport-icon">🚌</span> <strong>Desde Villa Crespo:</strong> Colectivo 67 o 130 desde Av. Scalabrini Ortiz/Córdoba hacia Av. Figueroa Alcorta. ~25 min.</div>
         <div class="day-blocks">
           <div class="day-block">
             <div class="day-block-label lbl-am"><span>☀</span> Mañana</div>
-            <p>MALBA: Frida Kahlo, Diego Rivera, Botero y el mejor arte latinoamericano. Edificio espectacular. Reservar 2h. Abre a las 11h.</p>
+            <p><a href="https://www.malba.org.ar/" target="_blank">MALBA</a>: Frida Kahlo, Diego Rivera, Botero y el mejor arte latinoamericano. Edificio espectacular. Reservar 2h. Abre a las 11h.</p>
           </div>
           <div class="day-block">
             <div class="day-block-label lbl-pm"><span>🌆</span> Tarde</div>
-            <p>Palermo Soho & los bosques: los famosos "paseadores" con manadas de golden retrievers y labradores. Rosedal, Paseo de la Infanta, ambiente hipster.</p>
-            <span class="day-special">🐕 Golden retrievers todos los días</span>
+            <p>👩‍🍳 <strong><a href="https://criollacooking.com/" target="_blank">Criolla Cooking & Wine</a></strong> — Clase de cocina argentina en pareja en Palermo Soho (Gorriti 4832). 3 horas: cocktail de bienvenida, empanadas, asado con papas andinas y flan de dulce de leche. Todo acompañado con vinos argentinos. ¡Máx. 10 personas por clase!</p>
+            <span class="day-workshop">👩‍🍳 Clase de cocina en pareja — Reservar en criollacooking.com</span>
           </div>
           <div class="day-block">
             <div class="day-block-label lbl-diner"><span>🍽</span> Cena</div>
-            <p><strong>🇧🇪 Bélgica Bar</strong> — Av. Pedro Goyena 901. Cervezas artesanales belgas, picadas, hamburguesas. Ambiente relajado.</p>
+            <p><strong>🇧🇪 <a href="https://www.instagram.com/belgicabar/" target="_blank">Bélgica Bar</a></strong> — Av. Pedro Goyena 901. Cervezas artesanales belgas, picadas, hamburguesas. Ambiente relajado.</p>
           </div>
         </div>
       </div>
@@ -565,20 +802,21 @@ footer p { margin-bottom: 0.4rem; }
     <div class="day-card">
       <div class="day-num"><div class="d">D6</div><div class="date">Mié<br>13/5</div></div>
       <div class="day-body">
-        <h3>Museo de Cs. Naturales & Torre Monumental</h3>
+        <h3>Museo de Cs. Naturales & Cocktails en pareja</h3>
+        <div class="day-transport"><span class="transport-icon">🚇</span> <strong>Desde Villa Crespo:</strong> Subte B desde Malabia → Angel Gallardo (1 parada). Museo a 5 min a pie del Parque Centenario. ~10 min total. Para Retiro después: Subte B → L.N. Alem + Línea C → Retiro.</div>
         <div class="day-blocks">
           <div class="day-block">
             <div class="day-block-label lbl-am"><span>☀</span> Mañana</div>
-            <p>Museo Bernardino Rivadavia: dinosaurios, fósiles patagónicos, aves nativas de Argentina. Media tarde, abre a las 14h (mar–dom).</p>
+            <p><a href="https://www.macnconicet.gob.ar/" target="_blank">Museo Bernardino Rivadavia</a>: dinosaurios, fósiles patagónicos, aves nativas de Argentina. Media tarde, abre a las 14h (mar–dom).</p>
           </div>
           <div class="day-block">
             <div class="day-block-label lbl-pm"><span>🌆</span> Tarde</div>
-            <p>Torre Monumental en Retiro: vistas panorámicas del río y la ciudad. ¡Los miércoles la entrada es gratuita! Parque San Martín al lado.</p>
-            <span class="day-special">🆓 Entrada gratis los miércoles</span>
+            <p>🍸 <strong><a href="http://vernecocktailclub.com/" target="_blank">Verne Cocktail Club</a></strong> — Clase de coctelería en pareja en Palermo (Medrano 1475). Uno de los mejores bares de BA (World's 50 Best Bars). Teoría y práctica con bartender privado, preparás tus propios cócteles de autor. ¡Experiencia inolvidable!</p>
+            <span class="day-workshop">🍸 Clase de coctelería en pareja — Reservar en vernecocktailclub.com</span>
           </div>
           <div class="day-block">
             <div class="day-block-label lbl-diner"><span>🍽</span> Cena</div>
-            <p><strong>🇮🇹 Nápoles</strong> — Av. Caseros 449, San Telmo. Decoración ecléctica con autos antiguos. Ambiente porteño único.</p>
+            <p><strong>🇮🇹 <a href="https://www.instagram.com/napoles.bsas/" target="_blank">Nápoles</a></strong> — Av. Caseros 449, San Telmo. Decoración ecléctica con autos antiguos. Ambiente porteño único.</p>
           </div>
         </div>
       </div>
@@ -589,18 +827,19 @@ footer p { margin-bottom: 0.4rem; }
       <div class="day-num"><div class="d">D7</div><div class="date">Jue<br>14/5</div></div>
       <div class="day-body">
         <h3>Obelisco & Casco Histórico</h3>
+        <div class="day-transport"><span class="transport-icon">🚇</span> <strong>Desde Villa Crespo:</strong> Subte B desde Malabia → Carlos Pellegrini. Salida directa al Obelisco / 9 de Julio. ~15 min.</div>
         <div class="day-blocks">
           <div class="day-block">
             <div class="day-block-label lbl-am"><span>☀</span> Mañana</div>
-            <p>El Obelisco en el cruce de Corrientes y 9 de Julio — una de las avenidas más anchas del mundo. Teatros, librerías, la gran arteria cultural porteña.</p>
+            <p>El <a href="https://turismo.buenosaires.gob.ar/es/otros-establecimientos/obelisco" target="_blank">Obelisco</a> en el cruce de Corrientes y 9 de Julio — una de las avenidas más anchas del mundo. Teatros, librerías, la gran arteria cultural porteña.</p>
           </div>
           <div class="day-block">
             <div class="day-block-label lbl-pm"><span>🌆</span> Tarde</div>
-            <p>Avenida de Mayo: Palacio Barolo (inspirado en la Divina Comedia), Cabildo, Catedral Metropolitana y el Café Tortoni — el café más antiguo de Buenos Aires.</p>
+            <p>Avenida de Mayo: <a href="https://www.palaciobarolo.com.ar/" target="_blank">Palacio Barolo</a> (inspirado en la Divina Comedia), <a href="https://turismo.buenosaires.gob.ar/es/otros-establecimientos/cabildo-de-buenos-aires" target="_blank">Cabildo</a>, <a href="https://turismo.buenosaires.gob.ar/es/otros-establecimientos/catedral-metropolitana" target="_blank">Catedral Metropolitana</a> y el <a href="https://www.cafetortoni.com.ar/" target="_blank">Café Tortoni</a> — el café más antiguo de Buenos Aires.</p>
           </div>
           <div class="day-block">
             <div class="day-block-label lbl-diner"><span>🍽</span> Cena</div>
-            <p><strong>🇵🇹 Amo – Club Portugués</strong> — Segunda visita para los platos que nos faltaron. Piano en vivo los viernes.</p>
+            <p><strong>🇵🇹 <a href="https://www.instagram.com/amo.clubportugues/" target="_blank">Amo – Club Portugués</a></strong> — Segunda visita para los platos que nos faltaron. Piano en vivo los viernes.</p>
           </div>
         </div>
       </div>
@@ -611,24 +850,54 @@ footer p { margin-bottom: 0.4rem; }
       <div class="day-num" style="background:var(--red);"><div class="d">D8</div><div class="date">Vie<br>15/5</div></div>
       <div class="day-body">
         <h3>🎭 Paseo Historieta & Noche de Tango</h3>
+        <div class="day-transport"><span class="transport-icon">🚇</span> <strong>Desde Villa Crespo:</strong> Subte B desde Malabia → L.N. Alem, luego a pie hacia Defensa/Chile (inicio del Paseo de la Historieta). ~30 min.</div>
         <div class="day-blocks">
           <div class="day-block">
             <div class="day-block-label lbl-am"><span>☀</span> Mañana</div>
-            <p>Paseo de la Historieta: estatuas de bronce de Mafalda, Isidoro, Larguirucho por las calles del centro. Recorrido cultural y divertido para fotos originales.</p>
+            <p><a href="https://turismo.buenosaires.gob.ar/es/otros-establecimientos/paseo-de-la-historieta" target="_blank">Paseo de la Historieta</a>: estatuas de bronce de Mafalda, Isidoro, Larguirucho por las calles del centro. Recorrido cultural y divertido para fotos originales.</p>
           </div>
           <div class="day-block">
             <div class="day-block-label lbl-pm"><span>🌆</span> Tarde & Noche</div>
-            <p><strong>El Querandí — Show de Tango:</strong> la mejor noche del viaje. Cena completa + show que narra la historia del tango. Desde las 21h. ¡Reserva obligatoria!</p>
+            <p><strong><a href="https://www.elquerandi.com.ar/" target="_blank">El Querandí</a> — Show de Tango:</strong> la mejor noche del viaje. Cena completa + show que narra la historia del tango. Desde las 21h. ¡Reserva obligatoria!</p>
             <span class="day-special">🎭 La noche perfecta para cerrar el viaje</span>
           </div>
           <div class="day-block">
             <div class="day-block-label lbl-diner"><span>🍽</span> Cena</div>
-            <p><strong>El Querandí</strong> — Perú 322, Monserrat. Cena + show de tango incluidos. La experiencia definitiva de Buenos Aires.</p>
+            <p><strong><a href="https://www.elquerandi.com.ar/" target="_blank">El Querandí</a></strong> — Perú 322, Monserrat. Cena + show de tango incluidos. La experiencia definitiva de Buenos Aires.</p>
           </div>
         </div>
       </div>
     </div>
 
+  </div>
+</section>
+
+<!-- MAPA INTERACTIVO -->
+<section class="mapa-section" id="mapa">
+  <div class="section-tag">Nuestra ruta</div>
+  <h2>El mapa del viaje</h2>
+  <p class="lead">Todos los lugares que vamos a descubrir en Buenos Aires, día por día. Hacé clic en los marcadores para ver los detalles.</p>
+
+  <div class="mapa-filters">
+    <button class="mapa-filter active" data-day="all">Todos</button>
+    <button class="mapa-filter" data-day="1">D1</button>
+    <button class="mapa-filter" data-day="2">D2</button>
+    <button class="mapa-filter" data-day="3">D3</button>
+    <button class="mapa-filter" data-day="4">D4</button>
+    <button class="mapa-filter" data-day="5">D5</button>
+    <button class="mapa-filter" data-day="6">D6</button>
+    <button class="mapa-filter" data-day="7">D7</button>
+    <button class="mapa-filter" data-day="8">D8</button>
+    <button class="mapa-filter" data-day="home">🏠</button>
+  </div>
+
+  <div id="leaflet-map"></div>
+
+  <div class="mapa-legend">
+    <span class="legend-item"><span class="legend-dot" style="background:#A62639;"></span> Visitas</span>
+    <span class="legend-item"><span class="legend-dot" style="background:#C9983A;"></span> Restaurantes</span>
+    <span class="legend-item"><span class="legend-dot" style="background:#5a3a8a;"></span> Talleres en pareja</span>
+    <span class="legend-item"><span class="legend-dot" style="background:#2a6a3a;"></span> Alojamiento</span>
   </div>
 </section>
 
@@ -644,7 +913,7 @@ footer p { margin-bottom: 0.4rem; }
       <div class="hl-content">
         <span class="hl-tag">Día 8 — Noche final</span>
         <h3>Show de Tango</h3>
-        <p>El Querandí — cena a la luz de las velas mientras bailarines narran la historia del tango con pasión pura.</p>
+        <p><a href="https://www.elquerandi.com.ar/" target="_blank">El Querandí</a> — cena a la luz de las velas mientras bailarines narran la historia del tango con pasión pura.</p>
       </div>
     </div>
     <div class="hl-card">
@@ -879,6 +1148,182 @@ footer p { margin-bottom: 0.4rem; }
   <p>8 – 15 de Mayo 2026  •  París → Buenos Aires ✈</p>
   <p style="margin-top:1rem; font-size:0.75rem; opacity:0.4;">¡Que lo disfruten! 🌟</p>
 </footer>
+
+<script>
+// ── HAMBURGER MENU ──
+(function() {
+  const btn = document.getElementById('navHamburger');
+  const links = document.getElementById('navLinks');
+  const overlay = document.getElementById('navOverlay');
+
+  function toggleMenu() {
+    btn.classList.toggle('open');
+    links.classList.toggle('open');
+    overlay.classList.toggle('show');
+    document.body.style.overflow = links.classList.contains('open') ? 'hidden' : '';
+  }
+
+  function closeMenu() {
+    btn.classList.remove('open');
+    links.classList.remove('open');
+    overlay.classList.remove('show');
+    document.body.style.overflow = '';
+  }
+
+  btn.addEventListener('click', toggleMenu);
+  overlay.addEventListener('click', closeMenu);
+  links.querySelectorAll('a').forEach(function(a) {
+    a.addEventListener('click', closeMenu);
+  });
+})();
+</script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<script>
+(function() {
+  const map = L.map('leaflet-map', {
+    center: [-34.6118, -58.4173],
+    zoom: 13,
+    scrollWheelZoom: false,
+    zoomControl: true
+  });
+
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/">CARTO</a>',
+    maxZoom: 19
+  }).addTo(map);
+
+  const places = [
+    // HOME
+    { lat:-34.5988, lng:-58.4389, day:'home', type:'home', name:'🏠 Alojamiento — Villa Crespo', desc:'Nuestro punto de partida cada mañana' },
+
+    // D1
+    { lat:-34.6083, lng:-58.3712, day:1, type:'visit', name:'Plaza de Mayo & Casa Rosada', desc:'El corazón político de Argentina' },
+    { lat:-34.6215, lng:-58.3735, day:1, type:'visit', name:'San Telmo — Plaza Dorrego', desc:'Calles adoquinadas, antigüedades, tango callejero' },
+    { lat:-34.6097, lng:-58.3741, day:1, type:'restaurant', name:"🇮🇹 D'oro Italian Bar", desc:'Perú 159, Monserrat — Pasta artesanal' },
+
+    // D2
+    { lat:-34.6345, lng:-58.3634, day:2, type:'visit', name:'Caminito — La Boca', desc:'El barrio más colorido de Buenos Aires' },
+    { lat:-34.6116, lng:-58.3622, day:2, type:'visit', name:'Puerto Madero — Puente de la Mujer', desc:'Barrio moderno, paseo junto al río' },
+    { lat:-34.6215, lng:-58.3722, day:2, type:'restaurant', name:'🇫🇷 Brasserie La Petanque', desc:'Defensa 596, San Telmo — Cocina parisina' },
+
+    // D3
+    { lat:-34.5878, lng:-58.3934, day:3, type:'visit', name:'Cementerio de la Recoleta', desc:'4.800 mausoleos, la tumba de Evita' },
+    { lat:-34.5836, lng:-58.3928, day:3, type:'visit', name:'Museo Nacional de Bellas Artes', desc:'Van Gogh, Rembrandt, Rodin — Entrada gratuita' },
+    { lat:-34.5936, lng:-58.4275, day:3, type:'restaurant', name:'🇫🇷 À Nos Amours', desc:'Gorriti 4488, Palermo — Bistrot íntimo' },
+
+    // D4
+    { lat:-34.5772, lng:-58.4104, day:4, type:'visit', name:'🦆 Jardín Japonés', desc:'Estanques de koi, patos en libertad, origami' },
+    { lat:-34.5925, lng:-58.4265, day:4, type:'workshop', name:'🎨 Pottery Art Café', desc:'Gorriti 4918, Palermo — Taller de cerámica en pareja' },
+    { lat:-34.6264, lng:-58.4353, day:4, type:'restaurant', name:'🇵🇹 Amo – Club Portugués', desc:'Pedro Goyena 1468 — Música en vivo, edificio histórico' },
+
+    // D5
+    { lat:-34.5839, lng:-58.4017, day:5, type:'visit', name:'MALBA', desc:'Frida Kahlo, Diego Rivera, Botero — Arte latinoamericano' },
+    { lat:-34.5938, lng:-58.4273, day:5, type:'workshop', name:'👩‍🍳 Criolla Cooking & Wine', desc:'Gorriti 4832, Palermo — Clase de cocina argentina, 3h' },
+    { lat:-34.6246, lng:-58.4316, day:5, type:'restaurant', name:'🇧🇪 Bélgica Bar', desc:'Pedro Goyena 901 — Cervezas artesanales belgas' },
+
+    // D6
+    { lat:-34.6072, lng:-58.4367, day:6, type:'visit', name:'Museo de Ciencias Naturales', desc:'Dinosaurios, fósiles patagónicos — Parque Centenario' },
+    { lat:-34.5977, lng:-58.4218, day:6, type:'workshop', name:'🍸 Verne Cocktail Club', desc:"Medrano 1475, Palermo — Clase de coctelería en pareja" },
+    { lat:-34.6230, lng:-58.3756, day:6, type:'restaurant', name:'🇮🇹 Nápoles', desc:'Caseros 449, San Telmo — Decoración ecléctica' },
+
+    // D7
+    { lat:-34.6037, lng:-58.3816, day:7, type:'visit', name:'Obelisco', desc:'Cruce de Corrientes y 9 de Julio' },
+    { lat:-34.6091, lng:-58.3861, day:7, type:'visit', name:'Palacio Barolo', desc:'Inspirado en la Divina Comedia de Dante' },
+    { lat:-34.6089, lng:-58.3807, day:7, type:'visit', name:'Café Tortoni', desc:'El café más antiguo de Buenos Aires (1858)' },
+    { lat:-34.6264, lng:-58.4353, day:7, type:'restaurant', name:'🇵🇹 Amo – Club Portugués (2ª visita)', desc:'Pedro Goyena 1468 — Piano en vivo' },
+
+    // D8
+    { lat:-34.6155, lng:-58.3755, day:8, type:'visit', name:'🎭 Paseo de la Historieta', desc:'Estatuas de Mafalda, Isidoro, Larguirucho' },
+    { lat:-34.6117, lng:-58.3740, day:8, type:'restaurant', name:'🎭 El Querandí — Show de Tango', desc:'Perú 322, Monserrat — Cena + show de tango' }
+  ];
+
+  const colors = {
+    visit: '#A62639',
+    restaurant: '#C9983A',
+    workshop: '#5a3a8a',
+    home: '#2a6a3a'
+  };
+
+  const dayColors = {
+    1:'#A62639', 2:'#A62639', 3:'#4a2a6a', 4:'#2a6a3a',
+    5:'#6a4a1a', 6:'#A62639', 7:'#A62639', 8:'#A62639', home:'#2a6a3a'
+  };
+
+  function createIcon(place) {
+    const color = colors[place.type] || colors.visit;
+    const size = place.type === 'home' ? 16 : 11;
+    const border = place.type === 'home' ? 3 : 2;
+    return L.divIcon({
+      className: 'custom-marker',
+      html: '<div style="width:'+size+'px;height:'+size+'px;border-radius:50%;background:'+color+';border:'+border+'px solid white;box-shadow:0 2px 8px rgba(0,0,0,0.4);"></div>',
+      iconSize: [size+border*2, size+border*2],
+      iconAnchor: [(size+border*2)/2, (size+border*2)/2],
+      popupAnchor: [0, -(size/2+border+2)]
+    });
+  }
+
+  const markers = [];
+
+  places.forEach(function(p) {
+    const dayLabel = p.day === 'home' ? '🏠' : 'Día ' + p.day;
+    const typeClass = 'popup-type-' + p.type;
+    const popup = '<div class="'+typeClass+'"><span class="popup-day">'+dayLabel+'</span><div class="popup-title">'+p.name+'</div><div class="popup-desc">'+p.desc+'</div></div>';
+    const marker = L.marker([p.lat, p.lng], { icon: createIcon(p) })
+      .bindPopup(popup, { maxWidth: 260 })
+      .addTo(map);
+    marker._placeDay = p.day;
+    markers.push(marker);
+  });
+
+  // Day filter buttons
+  document.querySelectorAll('.mapa-filter').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      document.querySelectorAll('.mapa-filter').forEach(function(b) { b.classList.remove('active'); });
+      btn.classList.add('active');
+      const day = btn.dataset.day;
+
+      markers.forEach(function(m) {
+        if (day === 'all') {
+          m.addTo(map);
+        } else if (day === 'home') {
+          m._placeDay === 'home' ? m.addTo(map) : map.removeLayer(m);
+        } else {
+          m._placeDay === parseInt(day) ? m.addTo(map) : map.removeLayer(m);
+        }
+      });
+
+      // Zoom to filtered markers
+      const visible = markers.filter(function(m) { return map.hasLayer(m); });
+      if (visible.length > 0) {
+        const group = L.featureGroup(visible);
+        map.fitBounds(group.getBounds().pad(0.15), { maxZoom: 15 });
+      }
+    });
+  });
+
+  // Connect places by day with subtle lines
+  for (let d = 1; d <= 8; d++) {
+    const dayPlaces = places.filter(function(p) { return p.day === d; });
+    if (dayPlaces.length > 1) {
+      const latlngs = dayPlaces.map(function(p) { return [p.lat, p.lng]; });
+      L.polyline(latlngs, {
+        color: dayColors[d] || '#A62639',
+        weight: 2,
+        opacity: 0.25,
+        dashArray: '6, 8'
+      }).addTo(map);
+    }
+  }
+
+  // Invalidate size on scroll into view
+  const observer = new IntersectionObserver(function(entries) {
+    entries.forEach(function(e) {
+      if (e.isIntersecting) { map.invalidateSize(); observer.unobserve(e.target); }
+    });
+  }, { threshold: 0.1 });
+  observer.observe(document.getElementById('leaflet-map'));
+})();
+</script>
 
 </body>
 </html>
